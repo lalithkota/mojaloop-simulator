@@ -345,6 +345,32 @@ paths:
       summary: Transfers funds from an external account to an internal account.
       tags:
         - Transfers
+    get:
+      operationId: BackendAllTransfersGet
+      description: The HTTP request `GET /transfers` is used to get a list of all the transfers.
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+          required: false
+          description: The numbers of items to return
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/transferDetailsResponse'
+          description: Transfers list.
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+      summary: Retrives all Transfers list.
+      tags:
+        - Transfers
   /transfers/{transferId}:
     get:
       operationId: BackendTransfersGet

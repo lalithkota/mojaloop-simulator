@@ -108,6 +108,7 @@ CREATE TABLE IF NOT EXISTS ${transferTable} (
     id TEXT NOT NULL PRIMARY KEY,
     request TEXT,
     response TEXT,
+    creationTime DATETIME DEFAULT CURRENT_TIMESTAMP,
     CHECK(id <> '')
 )
 `;

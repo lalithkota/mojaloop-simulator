@@ -40,6 +40,22 @@ module.exports = class Transfer {
     }
 
     /**
+    * Retrieves all transfers
+    *
+    * @async
+    * @param {Number} limit  The transfer id.
+    * @returns {Promise<Object>}  Transfer object.
+    */
+    async getAll(limit) {
+        if (!limit || limit<0){
+            const res = await this.db.all(`SELECT * FROM ${transferTable} ORDER BY id DESC`);
+            return res;
+        }
+        const res = await this.db.all(`SELECT * FROM ${transferTable} ORDER BY id DESC LIMIT ?`, [limit]);
+        return res;
+    }
+
+    /**
     * Retrieves a transfer
     *
     * @async

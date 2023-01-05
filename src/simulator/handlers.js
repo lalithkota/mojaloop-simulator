@@ -25,6 +25,7 @@
  ******/
 'use strict';
 
+const { parse } = require('querystring');
 const crypto = require('crypto');
 
 const { getStackOrInspect } = require('../lib/log/log');
@@ -87,6 +88,41 @@ const postTransfers = async (ctx) => {
         ctx.response.status = 200;
     } catch (err) {
         ctx.state.logger.isErrorEnabled && ctx.state.logger.error(`Error in postTransfers: ${getStackOrInspect(err)}`);
+        ctx.response.body = ApiErrorCodes.SERVER_ERROR;
+        ctx.response.status = 500;
+    }
+};
+
+const getAllTransfers = async (ctx) => {
+    try {
+        const { limit } = parse(ctx.request.querystring);
+        const res = await ctx.state.model.transfer.getAll(limit);
+        ctx.state.logger.isInfoEnabled && ctx.state.logger.info({ msg: 'getAllTransfers is returning body', body: res});
+        ctx.response.body = res.map(value => {
+            return {
+                ...JSON.parse(value.request),
+                creationTime: value.creationTime
+            }
+        });
+        ctx.response.status = 200;
+    } catch (err) {
+        ctx.state.logger.isErrorEnabled && ctx.state.logger.error(`Error in getAllTransfers: ${getStackOrInspect(err)}`);
+        ctx.response.body = ApiErrorCodes.SERVER_ERROR;
+        ctx.response.status = 500;
+    }
+};
+
+const getTransfers = async (ctx) => {
+    try {
+        const res = await ctx.state.model.transfer.get(ctx.state.path.params.transferId);
+        ctx.state.logger.isInfoEnabled && ctx.state.logger.info({ msg: 'getTransfers is returning body', body: res});
+        ctx.response.body = {
+            ...JSON.parse(res.request),
+            creationTime: res.creationTime
+        };
+        ctx.response.status = 200;
+    } catch (err) {
+        ctx.state.logger.isErrorEnabled && ctx.state.logger.error(`Error in getTransfers: ${getStackOrInspect(err)}`);
         ctx.response.body = ApiErrorCodes.SERVER_ERROR;
         ctx.response.status = 500;
     }
@@ -355,6 +391,7 @@ const map = {
     },
     '/transfers': {
         post: postTransfers,
+        get: getAllTransfers,
     },
     '/bulkTransfers': {
         post: postBulkTransfers,
@@ -370,6 +407,7 @@ const map = {
     },
     '/transfers/{transferId}': {
         put: putTransfersById,
+        get: getTransfers,
     },
     '/accounts/{ID}': {
         get: getAccountsByUserId,
